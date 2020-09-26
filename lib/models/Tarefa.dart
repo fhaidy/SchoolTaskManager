@@ -33,6 +33,15 @@ class Tarefa {
     dataEntrega = DateTime.parse(map["dataEntrega"]);
   }
 
+  static Tarefa mockTarefa() {
+    return Tarefa(
+        id: "",
+        titulo: "",
+        materia: "",
+        descricao: "",
+        dataEntrega: DateTime.now());
+  }
+
   @override
   String toString() {
     return 'Dog{id: $id, titulo: $titulo, materia: $materia,' +

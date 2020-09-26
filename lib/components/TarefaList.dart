@@ -2,10 +2,23 @@ import 'package:SchoolTaskManager/models/Tarefa.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'TarefaForm.dart';
+
 class TarefaList extends StatelessWidget {
   final List<Tarefa> tarefas;
   final void Function(String) onRemove;
-  TarefaList(this.tarefas, this.onRemove);
+  final void Function(String, String, String, DateTime) addTarefa;
+  final void Function(String, String, String, String, DateTime) updateTarefa;
+  TarefaList(this.tarefas, this.onRemove, this.addTarefa, this.updateTarefa);
+
+  _openTarefaForm(BuildContext context, Tarefa tarefa) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => TarefaForm(addTarefa, updateTarefa, true, tarefa),
+      isDismissible: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -42,7 +55,7 @@ class TarefaList extends StatelessWidget {
                     icon: Icon(Icons.delete, color: Colors.red[300]),
                     onPressed: () => onRemove(tarefas[index].id),
                   ),
-                  onTap: () {},
+                  onTap: () => _openTarefaForm(context, tarefas[index]),
                 ),
               ),
             ),

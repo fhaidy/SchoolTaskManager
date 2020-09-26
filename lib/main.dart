@@ -16,9 +16,8 @@ class SchoolTaskManager extends StatelessWidget {
     return MaterialApp(
       home: MyHomePage(),
       theme: ThemeData(
-        // fontFamily: 'QuickSand',
-        primarySwatch: Colors.grey,
-        accentColor: Colors.redAccent,
+        primarySwatch: Colors.deepOrange,
+        accentColor: Colors.orangeAccent,
         primaryTextTheme: TextTheme(
           bodyText1: TextStyle(
               fontSize: 20.0, fontFamily: 'QuickSand', color: Colors.black),
@@ -54,7 +53,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final globalKey = GlobalKey<ScaffoldState>();
   DatabaseHelper _dbHelper;
+  List<Tarefa> _tarefas = [];
   @override
   void initState() {
     super.initState();
@@ -69,12 +70,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  List<Tarefa> _tarefas = [];
-
   _abrirModalTarefa(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (_) => TarefaForm(_adicionarTarefa),
+      builder: (_) => TarefaForm(
+          _adicionarTarefa, _atualizaTarefa, false, Tarefa.mockTarefa()),
       isDismissible: true,
     );
   }
@@ -90,6 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ));
     await _atualizarTarefas();
     Navigator.of(this.context).pop();
+    _showSnackBar('Tarefa Criada !');
   }
 
   _removeTarefa(String id) async {
@@ -98,11 +99,32 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     await _dbHelper.deleteTarefa(id);
     await _atualizarTarefas();
+    _showSnackBar('Tarefa Removida !');
+  }
+
+  void _showSnackBar(String text) {
+    final snackBar = SnackBar(content: Text(text));
+    globalKey.currentState.showSnackBar(snackBar);
+  }
+
+  _atualizaTarefa(String id, String titulo, String materia, String descricao,
+      DateTime dataEntrega) async {
+    await _dbHelper.updateTarefa(Tarefa(
+      id: id,
+      titulo: titulo,
+      materia: materia,
+      descricao: descricao,
+      dataEntrega: dataEntrega,
+    ));
+    await _atualizarTarefas();
+    Navigator.of(this.context).pop();
+    _showSnackBar('Tarefa Atualizada !');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: globalKey,
       appBar: AppBar(title: Text("Gerenciador de Trabalhos"), actions: [
         IconButton(
           icon: Icon(Icons.add),
@@ -114,7 +136,8 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TarefaList(_tarefas.reversed.toList(), _removeTarefa),
+              TarefaList(_tarefas.reversed.toList(), _removeTarefa,
+                  _adicionarTarefa, _atualizaTarefa),
             ],
           ),
         ),

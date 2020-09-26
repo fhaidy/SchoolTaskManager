@@ -1,21 +1,24 @@
+import 'package:SchoolTaskManager/models/Tarefa.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TarefaForm extends StatefulWidget {
   final void Function(String, String, String, DateTime) onSubmit;
-
-  TarefaForm(this.onSubmit);
+  final void Function(String, String, String, String, DateTime) onUpdate;
+  final bool isUpdate;
+  Tarefa _tarefa;
+  TarefaForm(this.onSubmit, this.onUpdate, this.isUpdate, this._tarefa);
 
   @override
   _TarefaFormState createState() => _TarefaFormState();
 }
 
 class _TarefaFormState extends State<TarefaForm> {
-  final _tituloController = TextEditingController();
-  final _materiaController = TextEditingController();
-  final _descricaoController = TextEditingController();
+  TextEditingController _tituloController;
+  TextEditingController _materiaController;
+  TextEditingController _descricaoController;
   DateTime _dataEntrega = DateTime.now();
-
+  String _id;
   _submitForm() {
     final titulo = _tituloController.text;
     final materia = _materiaController.text;
@@ -25,6 +28,28 @@ class _TarefaFormState extends State<TarefaForm> {
         descricao.isNotEmpty &&
         _dataEntrega != null)
       widget.onSubmit(titulo, materia, descricao, _dataEntrega);
+  }
+
+  _updateForm() {
+    final titulo = _tituloController.text;
+    final materia = _materiaController.text;
+    final descricao = _descricaoController.text;
+    if (titulo.isNotEmpty &&
+        materia.isNotEmpty &&
+        descricao.isNotEmpty &&
+        _dataEntrega != null)
+      widget.onUpdate(_id, titulo, materia, descricao, _dataEntrega);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _tituloController = TextEditingController(text: widget._tarefa.titulo);
+    _materiaController = TextEditingController(text: widget._tarefa.materia);
+    _descricaoController =
+        TextEditingController(text: widget._tarefa.descricao);
+    _dataEntrega = widget._tarefa.dataEntrega;
+    _id = widget._tarefa.id;
   }
 
   _showDatePicker() {
@@ -91,9 +116,11 @@ class _TarefaFormState extends State<TarefaForm> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 RaisedButton(
-                  onPressed: _submitForm,
+                  onPressed: widget.isUpdate ? _updateForm : _submitForm,
                   color: Theme.of(context).primaryColor,
-                  child: Text('Nova Transação'),
+                  child: widget.isUpdate
+                      ? Text('Atualizar Transação')
+                      : Text('Nova Transação'),
                   textColor: Theme.of(context).primaryTextTheme.button.color,
                 ),
               ],
